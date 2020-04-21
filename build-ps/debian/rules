@@ -36,6 +36,7 @@ DISTRIBUTION = $(shell lsb_release -i -s)
 DISTRELEASE = $(shell lsb_release -c -s)
 
 MYSQL_SRC = $(shell pwd)
+SKIP_DEBUG_BINARY=1
 
 builddir = builddir
 builddebug = debug
@@ -43,7 +44,6 @@ builddebug = debug
 override_dh_auto_configure:
 	@echo "RULES.$@"
 
-SKIP_DEBUG_BINARY=1
 ifeq ($(SKIP_DEBUG_BINARY),)
 	( test -d $(builddebug) || mkdir $(builddebug) ) && cd $(builddebug) && \
 	    cmake -DBUILD_CONFIG=mysql_release \
