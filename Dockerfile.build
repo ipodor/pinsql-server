@@ -3,7 +3,8 @@ RUN apt-get -y install build-essential cmake git \
     software-properties-common libreadline-dev \
     bison flex zlib1g-dev debhelper libwrap0-dev po-debconf \
     chrpath ghostscript libpam0g-dev libaio-dev libnuma-dev \
-    libssl-dev libncurses5-dev libtool
+    libssl-dev libncurses5-dev libtool libsasl2-dev libsasl2-2 \
+    libsasl2-modules slapd
 
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt-get -y update
