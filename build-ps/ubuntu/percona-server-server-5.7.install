@@ -18,8 +18,6 @@ usr/bin/resolveip
 usr/bin/resolve_stack_dump
 usr/sbin/mysqld
 usr/bin/ps-admin
-# debug binary
-usr/sbin/mysqld-debug
 # man pages
 usr/share/man/man1/comp_err.1
 usr/share/man/man1/myisamchk.1
@@ -58,47 +56,19 @@ usr/lib/mysql/plugin/test_security_context.so
 usr/lib/mysql/plugin/validate_password.so
 usr/lib/mysql/plugin/version_token.so
 usr/lib/mysql/plugin/keyring_file.so
-usr/lib/mysql/plugin/debug/adt_null.so
-usr/lib/mysql/plugin/debug/auth_socket.so
-usr/lib/mysql/plugin/debug/innodb_engine.so
-usr/lib/mysql/plugin/debug/libmemcached.so
-usr/lib/mysql/plugin/debug/libpluginmecab.so
-usr/lib/mysql/plugin/debug/locking_service.so
-usr/lib/mysql/plugin/debug/mypluglib.so
-usr/lib/mysql/plugin/debug/mysql_no_login.so
-usr/lib/mysql/plugin/debug/rewriter.so
-usr/lib/mysql/plugin/debug/semisync_master.so
-usr/lib/mysql/plugin/debug/semisync_slave.so
-usr/lib/mysql/plugin/debug/test_security_context.so
-usr/lib/mysql/plugin/debug/validate_password.so
-usr/lib/mysql/plugin/debug/version_token.so
-usr/lib/mysql/plugin/debug/keyring_file.so
-usr/lib/mysql/plugin/debug/connection_control.so
-usr/lib/mysql/plugin/debug/authentication_ldap_sasl_client.so
 # Percona plugins
 usr/lib/mysql/plugin/audit_log.so
-usr/lib/mysql/plugin/debug/audit_log.so
 usr/lib/mysql/plugin/scalability_metrics.so
-usr/lib/mysql/plugin/debug/scalability_metrics.so
 usr/lib/mysql/plugin/auth_pam.so
-usr/lib/mysql/plugin/debug/auth_pam.so
 usr/lib/mysql/plugin/auth_pam_compat.so
-usr/lib/mysql/plugin/debug/auth_pam_compat.so
 usr/lib/mysql/plugin/libfnv1a_udf.so
-usr/lib/mysql/plugin/debug/libfnv1a_udf.so
 usr/lib/mysql/plugin/libfnv_udf.so
-usr/lib/mysql/plugin/debug/libfnv_udf.so
 usr/lib/mysql/plugin/libmurmur_udf.so
-usr/lib/mysql/plugin/debug/libmurmur_udf.so
 usr/lib/mysql/plugin/dialog.so
-usr/lib/mysql/plugin/debug/dialog.so
 usr/lib/mysql/plugin/auth.so
-usr/lib/mysql/plugin/debug/auth.so
 usr/lib/mysql/plugin/query_response_time.so
 usr/lib/mysql/plugin/connection_control.so
 usr/lib/mysql/plugin/authentication_ldap_sasl_client.so
-usr/lib/mysql/plugin/debug/query_response_time.so
-usr/lib/mysql/plugin/debug/keyring_vault.so
 usr/lib/mysql/plugin/keyring_vault.so
 # support files
 usr/share/mysql/dictionary.txt

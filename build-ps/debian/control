@@ -199,38 +199,3 @@ Description: Percona Server database server binaries
  .
  This package includes the server binaries.
 
-Package: percona-server-test-5.7
-Architecture: any
-Depends: percona-server-client-5.7 (= ${binary:Version}),
-         percona-server-server-5.7 (= ${binary:Version}),
-         libperconaserverclient20-dev (= ${binary:Version}),
-         perl, python, ${misc:Depends}, ${shlibs:Depends}
-Replaces: percona-server-server-5.7, percona-server-client-5.7
-Description: Percona Server database test suite
- Percona Server is a fast, stable and true multi-user, multi-threaded SQL
- database server. SQL (Structured Query Language) is the most popular database
- query language in the world. The main goals of Percona Server are speed,
- robustness and ease of use.
- .
- This package includes the Percona Server test framework that provides 
- a means for verifying that Percona Server and its client programs 
- operate according to expectations
-
-Package: percona-server-source-5.7
-Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: Percona Server 5.7 source
- This package includes the source code to Percona Server as configured before
- building.
-
-Package: percona-server-5.7-dbg
-Architecture: any
-Section: debug
-Depends: percona-server-server-5.7 (= ${binary:Version}), ${misc:Depends}
-Description: Debugging package for Percona Server
- Percona Server is a fast, stable and true multi-user, multi-threaded SQL
- database server. SQL (Structured Query Language) is the most popular database
- query language in the world. The main goals of Percona Server are speed,
- robustness and ease of use.
- .
- This package contains the debugging symbols for the Percona Server binaries.
