@@ -5344,14 +5344,18 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
       }
     }
 
-    if ((flags & MY_PRINT_CSV) && *s == '\t') {
-      tee_putc('\\', file);
-      tee_putc('\t', file);
-    } else if ((flags & MY_PRINT_CSV) && *s == '\0') {
-      tee_putc(0, file);
-    } else if ((flags & MY_PRINT_CSV) && *s == '\n') {
-      tee_putc('\\', file);
-      tee_putc('\n', file);
+    if (flags & MY_PRINT_CSV) {
+      if (&& *s == '\t') {
+        tee_putc('\\', file);
+        tee_putc('\t', file);
+      } else if (*s == '\0') {
+        tee_putc(0, file);
+      } else if (*s == '\n') {
+        tee_putc('\\', file);
+        tee_putc('\n', file);
+      } else if (*s == '\\') {
+        tee_fputs("\\\\", file);
+      }
     } else if ((flags & MY_PRINT_XML) && (t= array_value(xmlmeta, *s)))
       tee_fputs(t, file);
     else if ((flags & MY_PRINT_SPS_0) && *s == '\0')
@@ -5362,7 +5366,7 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
       tee_fputs("\\t", file);      // This would destroy tab format
     else if ((flags & MY_PRINT_CTRL) && *s == '\n')
       tee_fputs("\\n", file);      // This too
-    else if ((flags & (MY_PRINT_CTRL | MY_PRINT_CSV)) && *s == '\\')
+    else if ((flags & MY_PRINT_CTRL) && *s == '\\')
       tee_fputs("\\\\", file);
     else
     {
