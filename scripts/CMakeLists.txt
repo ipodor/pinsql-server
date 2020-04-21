@@ -425,7 +425,6 @@ ELSE()
     SET(BIN_SCRIPTS
       mysql_config
       mysqldumpslow
-      ps_tokudb_admin
       ps_mysqld_helper
       ps-admin
       )
@@ -435,7 +434,6 @@ ELSE()
       mysqldumpslow
       mysqld_multi
       mysqld_safe
-      ps_tokudb_admin
       ps_mysqld_helper
       ps-admin
       )

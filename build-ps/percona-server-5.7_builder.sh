@@ -138,11 +138,6 @@ get_sources(){
     echo "PRODUCT_FULL=${PRODUCT}.${MYSQL_VERSION_PATCH}${MYSQL_VERSION_EXTRA}" >> ../percona-server-5.7.properties
     echo "BUILD_NUMBER=${BUILD_NUMBER}" >> ../percona-server-5.7.properties
     echo "BUILD_ID=${BUILD_ID}" >> ../percona-server-5.7.properties
-    echo "PERCONAFT_REPO=${PERCONAFT_REPO}" >> ../percona-server-5.7.properties
-    echo "PERCONAFT_BRANCH=${PERCONAFT_BRANCH}" >> ../percona-server-5.7.properties
-    echo "TOKUBACKUP_REPO=${TOKUBACKUP_REPO}" >> ../percona-server-5.7.properties
-    echo "TOKUBACKUP_BRANCH=${TOKUBACKUP_BRANCH}" >> ../percona-server-5.7.properties
-    echo "TOKUDB_VERSION=${MYSQL_VERSION_MAJOR}.${MYSQL_VERSION_MINOR}.${MYSQL_VERSION_PATCH}${MYSQL_VERSION_EXTRA}" >> ../percona-server-5.7.properties
     BOOST_PACKAGE_NAME=$(cat cmake/boost.cmake|grep "SET(BOOST_PACKAGE_NAME"|awk -F '"' '{print $2}')
     echo "BOOST_PACKAGE_NAME=${BOOST_PACKAGE_NAME}" >> ../percona-server-5.7.properties
     echo "RPM_RELEASE=${RPM_RELEASE}" >> ../percona-server-5.7.properties
@@ -155,54 +150,6 @@ get_sources(){
     echo "DESTINATION=${DESTINATION}" >> ../percona-server-5.7.properties
     echo "UPLOAD=UPLOAD/${DESTINATION}/BUILDS/${PRODUCT}/${PRODUCT_FULL}/${BRANCH_NAME}/${REVISION}/${TIMESTAMP}" >> ../percona-server-5.7.properties
 
-    rm -rf storage/tokudb/PerconaFT
-    rm -rf plugin/tokudb-backup-plugin/Percona-TokuBackup
-    git submodule init
-    git submodule update
-    rm -rf storage/tokudb/PerconaFT
-    rm -rf plugin/tokudb-backup-plugin/Percona-TokuBackup
-    if [ ${PERCONAFT_REPO} = 0 ]; then
-        PERCONAFT_REPO=''
-    fi
-    if [ ${TOKUBACKUP_REPO} = 0 ]; then
-        TOKUBACKUP_REPO=''
-    fi
-
-    if [ -z ${PERCONAFT_REPO} -a -z ${TOKUBACKUP_REPO} ]; then
-        mkdir plugin/tokudb-backup-plugin/Percona-TokuBackup
-        mkdir storage/tokudb/PerconaFT
-        git submodule init
-        git submodule update
-        cd storage/tokudb/PerconaFT
-        git fetch origin
-        git checkout ${PERCONAFT_BRANCH}
-        if [ ${PERCONAFT_BRANCH} = "master" ]; then
-            git pull
-        fi
-        cd ${WORKDIR}/percona-server
-        #
-        cd plugin/tokudb-backup-plugin/Percona-TokuBackup
-        git fetch origin
-        git checkout ${TOKUBACKUP_BRANCH}
-        if [ ${TOKUBACKUP_BRANCH} = "master" ]; then
-            git pull
-        fi
-        cd ${WORKDIR}/percona-server
-    else
-        cd storage/tokudb
-        git clone ${PERCONAFT_REPO}
-        cd PerconaFT
-        git checkout ${PERCONAFT_BRANCH}
-        cd ${WORKDIR}/percona-server
-        #
-        cd plugin/tokudb-backup-plugin
-        git clone ${TOKUBACKUP_REPO}
-        cd Percona-TokuBackup
-        git checkout ${TOKUBACKUP_BRANCH}
-        cd ${WORKDIR}/percona-server
-    fi
-    #
-    git submodule update
     cmake . -DDOWNLOAD_BOOST=1 -DWITH_BOOST=${WORKDIR}/build-ps/boost
     make dist
     #
@@ -212,28 +159,13 @@ get_sources(){
     rm -fr ${PSDIR}
     tar xzf ${EXPORTED_TAR}
     rm -f ${EXPORTED_TAR}
-    # add git submodules because make dist uses git archive which doesn't include them
-    rsync -av storage/tokudb/PerconaFT ${PSDIR}/storage/tokudb --exclude .git
-    rsync -av plugin/tokudb-backup-plugin/Percona-TokuBackup ${PSDIR}/plugin/tokudb-backup-plugin --exclude .git
-    rsync -av storage/rocksdb/rocksdb/ ${PSDIR}/storage/rocksdb/rocksdb --exclude .git
-    rsync -av storage/rocksdb/third_party/lz4/ ${PSDIR}/storage/rocksdb/third_party/lz4 --exclude .git
-    rsync -av storage/rocksdb/third_party/zstd/ ${PSDIR}/storage/rocksdb/third_party/zstd --exclude .git
     #
     cd ${PSDIR}
-    # set tokudb version - can be seen with show variables like '%version%'
-    sed -i "1s/^/SET(TOKUDB_VERSION ${TOKUDB_VERSION})\n/" storage/tokudb/CMakeLists.txt
-    #
     sed -i "s:@@PERCONA_VERSION_EXTRA@@:${MYSQL_VERSION_EXTRA#-}:g" build-ps/debian/rules
     sed -i "s:@@REVISION@@:${REVISION}:g" build-ps/debian/rules
-    sed -i "s:@@TOKUDB_BACKUP_VERSION@@:${TOKUDB_VERSION}:g" build-ps/debian/rules
-    sed -i "s:@@PERCONA_VERSION_EXTRA@@:${MYSQL_VERSION_EXTRA#-}:g" build-ps/debian/rules.notokudb
-    sed -i "s:@@REVISION@@:${REVISION}:g" build-ps/debian/rules.notokudb
     #
     sed -i "s:@@PERCONA_VERSION_EXTRA@@:${MYSQL_VERSION_EXTRA#-}:g" build-ps/ubuntu/rules
     sed -i "s:@@REVISION@@:${REVISION}:g" build-ps/ubuntu/rules
-    sed -i "s:@@TOKUDB_BACKUP_VERSION@@:${TOKUDB_VERSION}:g" build-ps/ubuntu/rules
-    sed -i "s:@@PERCONA_VERSION_EXTRA@@:${MYSQL_VERSION_EXTRA#-}:g" build-ps/ubuntu/rules.notokudb
-    sed -i "s:@@REVISION@@:${REVISION}:g" build-ps/ubuntu/rules.notokudb
     #
     sed -i "s:@@MYSQL_VERSION@@:${MYSQL_VERSION_MAJOR}.${MYSQL_VERSION_MINOR}.${MYSQL_VERSION_PATCH}:g" build-ps/percona-server.spec
     sed -i "s:@@PERCONA_VERSION@@:${MYSQL_VERSION_EXTRA#-}:g" build-ps/percona-server.spec
@@ -741,9 +673,9 @@ build_tarball(){
     cd ${TARFILE%.tar.gz}
     if [ "${YASSL}" = 1 ]; then
         DIRNAME="tarball_yassl"
-        CMAKE_OPTS="-DWITH_ROCKSDB=1" bash -xe ./build-ps/build-binary.sh --with-jemalloc=../jemalloc/ --with-yassl --with-mecab="${MECAB_INSTALL_DIR}/usr" ../TARGET
+        CMAKE_OPTS="-DWITH_ROCKSDB=0" bash -xe ./build-ps/build-binary.sh --with-jemalloc=../jemalloc/ --with-yassl --with-mecab="${MECAB_INSTALL_DIR}/usr" ../TARGET
     else
-        CMAKE_OPTS="-DWITH_ROCKSDB=1" bash -xe ./build-ps/build-binary.sh --with-mecab="${MECAB_INSTALL_DIR}/usr" --with-jemalloc=../jemalloc/ ../TARGET
+        CMAKE_OPTS="-DWITH_ROCKSDB=0" bash -xe ./build-ps/build-binary.sh --with-mecab="${MECAB_INSTALL_DIR}/usr" --with-jemalloc=../jemalloc/ ../TARGET
         DIRNAME="tarball"
     fi
     mkdir -p ${WORKDIR}/${DIRNAME}

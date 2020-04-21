@@ -148,45 +148,6 @@ Diagnostics Improvements
    diagnostics/response_time_distribution
    diagnostics/innodb_fragmentation_count
 
-TokuDB
-======
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   tokudb/tokudb_intro
-   tokudb/tokudb_installation
-   tokudb/using_tokudb
-   tokudb/fast_updates
-   tokudb/tokudb_files_and_file_types
-   tokudb/tokudb_file_management
-   tokudb/tokudb_background_analyze_table
-   tokudb/tokudb_variables
-   tokudb/tokudb_status_variables
-   tokudb/tokudb_fractal_tree_indexing
-   tokudb/tokudb_troubleshooting
-   tokudb/tokudb_performance_schema
-   tokudb/toku_backup
-   tokudb/tokudb_faq
-   tokudb/removing_tokudb
-
-Percona MyRocks
-===============
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   Introduction <myrocks/index>
-   Installation <myrocks/install>
-   Limitations <myrocks/limitations>
-   Differences <myrocks/differences>
-   Server Variables <myrocks/variables>
-   Status Variables <myrocks/status_variables>
-   myrocks/gap_locks_detection
-   myrocks/data_loading
-
 Reference
 =========
 

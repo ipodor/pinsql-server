@@ -30,7 +30,6 @@
 %global mysql_version @@MYSQL_VERSION@@
 %global percona_server_version @@PERCONA_VERSION@@
 %global revision @@REVISION@@
-%global tokudb_backup_version %{mysql_version}-%{percona_server_version}
 %global rpm_release @@RPM_RELEASE@@
 
 %global release %{percona_server_version}.%{rpm_release}%{?dist}
@@ -38,12 +37,6 @@
 # By default, a build will be done using the system SSL library
 %{?with_ssl: %global ssl_option -DWITH_SSL=%{with_ssl}}
 %{!?with_ssl: %global ssl_option -DWITH_SSL=system}
-
-# By default a build will be done including the TokuDB
-%{!?with_tokudb: %global tokudb 1}
-
-# By default a build will be done including the RocksDB
-%{!?with_rocksdb: %global rocksdb 1}
 
 # Pass path to mecab lib
 %{?with_mecab: %global mecab_option -DWITH_MECAB=%{with_mecab}}
@@ -62,23 +55,13 @@
 %{!?compilation_comment_debug:   %global compilation_comment_debug Percona Server - Debug (GPL), Release %{percona_server_version}, Revision %{revision}}
 %{!?src_base:                    %global src_base percona-server}
 
-# Setup cmake flags for TokuDB
-%if 0%{?tokudb}
-  %global TOKUDB_FLAGS -DWITH_VALGRIND=OFF -DUSE_VALGRIND=OFF -DDEBUG_EXTNAME=OFF -DBUILD_TESTING=OFF -DUSE_GTAGS=OFF -DUSE_CTAGS=OFF -DUSE_ETAGS=OFF -DUSE_CSCOPE=OFF -DTOKUDB_BACKUP_PLUGIN_VERSION=%{tokudb_backup_version}
-  %global TOKUDB_DEBUG_ON -DTOKU_DEBUG_PARANOID=ON
-  %global TOKUDB_DEBUG_OFF -DTOKU_DEBUG_PARANOID=OFF
-%else
-  %global TOKUDB_FLAGS -DWITHOUT_TOKUDB=1
-  %global TOKUDB_DEBUG_ON %{nil}
-  %global TOKUDB_DEBUG_OFF %{nil}
-%endif
+# no TokuDB
+%global TOKUDB_FLAGS -DWITHOUT_TOKUDB=1
+%global TOKUDB_DEBUG_ON %{nil}
+%global TOKUDB_DEBUG_OFF %{nil}
 
-# Setup cmake flags for RocksDB
-%if 0%{?rocksdb}
-  %global ROCKSDB_FLAGS -DWITH_ROCKSDB=1
-%else
-  %global ROCKSDB_FLAGS -DWITH_ROCKSDB=0
-%endif
+# no RocksDB
+%global ROCKSDB_FLAGS -DWITH_ROCKSDB=0
 
 # On rhel 5/6 we still have renamed library to libperconaserverclient
 %if 0%{?rhel} > 6
@@ -311,46 +294,6 @@ This package contains the shared compat libraries for Percona Server %{compatver
 applications.
 %endif
 
-%if 0%{?tokudb}
-# ----------------------------------------------------------------------------
-%package -n Percona-Server-tokudb%{product_suffix}
-Summary:        Percona Server - TokuDB package
-Group:          Applications/Databases
-Requires:       Percona-Server-server%{product_suffix} = %{version}-%{release}
-Requires:       Percona-Server-shared%{product_suffix} = %{version}-%{release}
-Requires:       Percona-Server-client%{product_suffix} = %{version}-%{release}
-Requires:       jemalloc >= 3.3.0
-Provides:       tokudb-plugin = %{version}-%{release}
-
-Requires:		selinux-policy
-Requires:		policycoreutils
-Requires(pre):		policycoreutils
-Requires(post):		policycoreutils
-Requires(postun):       policycoreutils
-
-%if 0%{?rhel} == 6
-BuildRequires: 		selinux-policy
-%else
-BuildRequires: 		selinux-policy-devel
-%endif
-
-%description -n Percona-Server-tokudb%{product_suffix}
-This package contains the TokuDB plugin for Percona Server %{version}-%{release}
-%endif
-
-%if 0%{?rocksdb}
-# ----------------------------------------------------------------------------
-%package -n Percona-Server-rocksdb%{product_suffix}
-Summary:        Percona Server - RocksDB package
-Group:          Applications/Databases
-Requires:       Percona-Server-server%{product_suffix} = %{version}-%{release}
-Requires:       Percona-Server-shared%{product_suffix} = %{version}-%{release}
-Requires:       Percona-Server-client%{product_suffix} = %{version}-%{release}
-
-%description -n Percona-Server-rocksdb%{product_suffix}
-This package contains the RocksDB plugin for Percona Server %{version}-%{release}
-%endif
-
 %prep
 %setup -q -T -a 0 -a 10 -c -n %{src_dir}
 pushd %{src_dir}
@@ -408,7 +351,7 @@ mkdir debug
            -DWITH_EMBEDDED_SERVER=0 \
            -DWITH_EMBEDDED_SHARED_LIBRARY=0 \
            -DWITH_PAM=1 \
-           -DWITH_ROCKSDB=1 \
+           -DWITH_ROCKSDB=0 \
            -DWITH_INNODB_MEMCACHED=1 \
            -DWITH_ZLIB=system \
            -DWITH_SCALABILITY_METRICS=ON \
@@ -444,7 +387,7 @@ mkdir release
            -DWITH_EMBEDDED_SERVER=0 \
            -DWITH_EMBEDDED_SHARED_LIBRARY=0 \
            -DWITH_PAM=1 \
-           -DWITH_ROCKSDB=1 \
+           -DWITH_ROCKSDB=0 \
            -DWITH_INNODB_MEMCACHED=1 \
            -DWITH_ZLIB=system \
            -DWITH_SCALABILITY_METRICS=ON \
@@ -471,15 +414,6 @@ install -d -m 0751 %{buildroot}/var/lib/mysql
 install -d -m 0755 %{buildroot}/var/run/mysqld
 install -d -m 0750 %{buildroot}/var/lib/mysql-files
 install -d -m 0750 %{buildroot}/var/lib/mysql-keyring
-
-# SElinux
-%if 0%{?tokudb}
-pushd $MBD/%{src_dir}/policy/selinux
-make -f /usr/share/selinux/devel/Makefile
-install -D -m 0644 $MBD/%{src_dir}/policy/selinux/percona-server.pp %{buildroot}%{_datadir}/selinux/packages/percona-server/percona-server.pp
-popd
-# SElinux END
-%endif
 
 # Install all binaries
 cd $MBD/release
@@ -521,16 +455,7 @@ rm -rf %{buildroot}%{_datadir}/percona-server/mysql.server
 rm -rf %{buildroot}%{_datadir}/percona-server/mysqld_multi.server
 rm -f %{buildroot}%{_datadir}/percona-server/win_install_firewall.sql
 rm -rf %{buildroot}%{_bindir}/mysql_embedded
-
-%if 0%{?tokudb}
-  rm -f %{buildroot}%{_prefix}/README.md
-  rm -f %{buildroot}%{_prefix}/COPYING.AGPLv3
-  rm -f %{buildroot}%{_prefix}/COPYING.GPLv2
-  rm -f %{buildroot}%{_prefix}/PATENTS
-%else
-  # Not needed if TokuDB package is not created
-  rm -rf %{buildroot}%{_bindir}/ps_tokudb_admin
-%endif
+rm -rf %{buildroot}%{_bindir}/ps_tokudb_admin
 
 # Remove upcoming man pages, to avoid breakage when they materialize
 # Keep this comment as a placeholder for future cases
@@ -701,34 +626,6 @@ for lib in libmysqlclient{.so.18.0.0,.so.18,_r.so.18.0.0,_r.so.18}; do
 done
 /sbin/ldconfig
 %endif
-
-%if 0%{?tokudb}
-%post -n Percona-Server-tokudb%{product_suffix}
-/usr/sbin/semodule -i %{_datadir}/selinux/packages/percona-server/percona-server.pp >/dev/null 2>&1 || :
-if [ $1 -eq 1 ] ; then
-  echo -e "\n\n * This release of Percona Server is distributed with TokuDB storage engine."
-  echo -e " * Run the following script to enable the TokuDB storage engine in Percona Server:\n"
-  echo -e "\tps-admin --enable-tokudb -u <mysql_admin_user> -p[mysql_admin_pass] [-S <socket>] [-h <host> -P <port>]\n"
-  echo -e " * See http://www.percona.com/doc/percona-server/5.7/tokudb/tokudb_installation.html for more installation details\n"
-  echo -e " * See http://www.percona.com/doc/percona-server/5.7/tokudb/tokudb_intro.html for an introduction to TokuDB\n\n"
-fi
-
-%postun -n Percona-Server-tokudb%{product_suffix}
-if [ $1 -eq 0 ] ; then
-    /usr/sbin/semodule -r percona-server >/dev/null 2>&1 || :
-fi
-
-%endif
-
-%if 0%{?rocksdb}
-%post -n Percona-Server-rocksdb%{product_suffix}
-if [ $1 -eq 1 ] ; then
-  echo -e "\n\n * This release of Percona Server is distributed with RocksDB storage engine."
-  echo -e " * Run the following script to enable the RocksDB storage engine in Percona Server:\n"
-  echo -e "\tps-admin --enable-rocksdb -u <mysql_admin_user> -p[mysql_admin_pass] [-S <socket>] [-h <host> -P <port>]\n"
-fi
-%endif
-
 
 %files -n Percona-Server-server%{product_suffix}
 %defattr(-, root, root, -)
@@ -1052,34 +949,10 @@ fi
 %attr(755, root, root) %{_libdir}/mysql/plugin/debug/test_security_context.so
 %attr(755, root, root) %{_libdir}/mysql/plugin/debug/test_udf_services.so
 
-%if 0%{?tokudb}
-%files -n Percona-Server-tokudb%{product_suffix}
-%dir %attr(755, root, root) %{_datadir}/selinux/packages/percona-server
-%attr(644, root, root) %{_datadir}/selinux/packages/percona-server/percona-server.pp
-%attr(-, root, root)
-%{_bindir}/tokuftdump
-%{_libdir}/mysql/plugin/ha_tokudb.so
-%attr(755, root, root) %{_libdir}/mysql/plugin/debug/ha_tokudb.so
-%attr(755, root, root) %{_bindir}/ps_tokudb_admin
-%attr(755, root, root) %{_bindir}/tokuft_logprint
-%attr(755, root, root) %{_libdir}/mysql/plugin/tokudb_backup.so
-%attr(755, root, root) %{_libdir}/mysql/plugin/debug/tokudb_backup.so
-%attr(755, root, root) %{_libdir}/mysql/libHotBackup.so
-%{_includedir}/backup.h
-%endif
-
-%if 0%{?rocksdb}
-%files -n Percona-Server-rocksdb%{product_suffix}
-%attr(-, root, root)
-%{_libdir}/mysql/plugin/ha_rocksdb.so
-%attr(755, root, root) %{_libdir}/mysql/plugin/debug/ha_rocksdb.so
-%attr(755, root, root) %{_bindir}/ldb
-%attr(755, root, root) %{_bindir}/mysql_ldb
-%attr(755, root, root) %{_bindir}/sst_dump
-%endif
-
-
 %changelog
+* Tue Apr 21 2020 Ernie Souhrada <esouhrada@pinterest.com>
+- Removed TokuDB and RocksDB
+
 * Wed Aug  2 2017 Evgeniy Patlan <evgeniy.patlan@percona.com>
 - Added RocksDB
 

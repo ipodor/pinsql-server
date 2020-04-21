@@ -201,9 +201,6 @@ my $DEFAULT_SUITES= "main,sys_vars,binlog,binlog_encryption,rpl_encryption,encry
   ."test_service_sql_api,jp,stress,engines/iuds,engines/funcs,"
   ."group_replication,x,"
   ."query_response_time,audit_log,json,connection_control,"
-  ."tokudb.add_index,tokudb.alter_table,tokudb,tokudb.bugs,tokudb.parts,"
-  ."tokudb.rpl,tokudb.perfschema,"
-  ."rocksdb,rocksdb_rpl,rocksdb_sys_vars,"
   ."keyring_vault,audit_null,percona-pam-for-mysql";
 my $opt_suites;
 
@@ -2883,27 +2880,6 @@ sub environment_setup {
     valgrind_client_arguments($args, \$exe_innochecksum);
     $ENV{'INNOCHECKSUM'}= mtr_args2str($exe_innochecksum, @$args);
   }
-
-  # ----------------------------------------------------
-  # sst_dump
-  # ----------------------------------------------------
-  my $exe_sst_dump=
-    mtr_exe_maybe_exists(
-           vs_config_dirs('storage/rocksdb', 'sst_dump'),
-           "$path_client_bindir/sst_dump",
-           "$basedir/storage/rocksdb/sst_dump");
-  $ENV{'MYSQL_SST_DUMP'}= native_path($exe_sst_dump);
-
-  # ----------------------------------------------------
-  # tokuft_dump
-  # ----------------------------------------------------
-  my $exe_tokuftdump=
-    mtr_exe_maybe_exists(
-           vs_config_dirs('storage/tokudb/PerconaFT/tools', 'tokuftdump'),
-           "$path_client_bindir/tokuftdump",
-           "$basedir/storage/tokudb/PerconaFT/tools/tokuftdump");
-  $ENV{'MYSQL_TOKUFTDUMP'}= native_path($exe_tokuftdump);
-
 
   # ----------------------------------------------------
   # Setup env so childs can execute myisampack and myisamchk
