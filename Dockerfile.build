@@ -1,0 +1,16 @@
+RUN apt-get -y update
+RUN apt-get -y install build-essential cmake git \
+    software-properties-common libreadline-dev \
+    bison flex zlib1g-dev debhelper libwrap0-dev po-debconf \
+    chrpath ghostscript libpam0g-dev libaio-dev libnuma-dev \
+    libssl-dev libncurses5-dev libtool
+
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
+RUN apt-get -y update
+RUN apt-get -y install gcc-9 g++-9
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+
+WORKDIR /root/pinsql-server
+COPY pinsql-server /root/pinsql-server
+
+RUN rm -rf .git
