@@ -43,6 +43,7 @@ builddebug = debug
 override_dh_auto_configure:
 	@echo "RULES.$@"
 
+SKIP_DEBUG_BINARY=1
 ifeq ($(SKIP_DEBUG_BINARY),)
 	( test -d $(builddebug) || mkdir $(builddebug) ) && cd $(builddebug) && \
 	    cmake -DBUILD_CONFIG=mysql_release \
@@ -162,12 +163,8 @@ override_dh_auto_install:
         # Add helper functions for maintainer scripts
 	install -m 0644 debian/extra/mysql-helpers debian/tmp/usr/share/mysql/
 
-
 	# install source tarball for source package
 	install -D -m 0644 $(EXPORTED_SOURCE_TARBALL) $(TMP)/usr/src/percona-server/`basename $(EXPORTED_SOURCE_TARBALL)`
-
-override_dh_strip:
-	dh_strip --dbg-package=percona-server-5.7-dbg
 
 override_dh_installinit:
 	@echo "RULES.$@"
