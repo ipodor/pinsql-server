@@ -5345,7 +5345,7 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
     }
 
     if (flags & MY_PRINT_CSV) {
-      if (&& *s == '\t') {
+      if (*s == '\t') {
         tee_putc('\\', file);
         tee_putc('\t', file);
       } else if (*s == '\0') {
