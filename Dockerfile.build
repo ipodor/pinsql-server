@@ -4,7 +4,7 @@ RUN apt-get -y install build-essential cmake git \
     bison flex zlib1g-dev debhelper libwrap0-dev po-debconf \
     chrpath ghostscript libpam0g-dev libaio-dev libnuma-dev \
     libssl-dev libncurses5-dev libtool libsasl2-dev libsasl2-2 \
-    libsasl2-modules libmecab-dev mecab
+    libsasl2-modules libmecab-dev mecab libcurl4-openssl-dev dh-systemd
 
 RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt-get -y update
