@@ -5524,9 +5524,9 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
       if (*s == '\t') {
         tee_putc('\\', file);
         tee_putc('\t', file);
-      else if (*s == '\0') {
+      } else if (*s == '\0') {
         tee_putc(0, file);
-      else if (*s == '\n') {
+      } else if (*s == '\n') {
         tee_putc('\\', file);
         tee_putc('\t', file);
       } else if (*s == '\\') {
