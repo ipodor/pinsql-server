@@ -8,7 +8,7 @@ export CFLAGS=
 export CXXFLAGS=
 
 PACKAGE=percona-server-5.7
-PS_VERSION_EXTRA = '001'
+PS_VERSION_EXTRA = '200'
 REVISION = 'All_The_Meows'
 COMPILATION_COMMENT_RELEASE = "PerconaPin Server (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
 COMPILATION_COMMENT_DEBUG = "PerconaPin Server - Debug (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"

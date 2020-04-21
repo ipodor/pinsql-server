@@ -8,10 +8,10 @@ export CFLAGS=
 export CXXFLAGS=
 
 PACKAGE=percona-server-5.7
-PS_VERSION_EXTRA = '@@PERCONA_VERSION_EXTRA@@'
-REVISION = '@@REVISION@@'
-COMPILATION_COMMENT_RELEASE = "Percona Server (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
-COMPILATION_COMMENT_DEBUG = "Percona Server - Debug (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
+PS_VERSION_EXTRA = '200'
+REVISION = 'All_The_Meows'
+COMPILATION_COMMENT_RELEASE = "PerconaPin Server (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
+COMPILATION_COMMENT_DEBUG = "PerconaPin Server - Debug (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
 
 TMP=$(CURDIR)/debian/tmp/
 TMPD=$(CURDIR)/debian/tmp-debug/
@@ -81,7 +81,7 @@ ifeq ($(SKIP_DEBUG_BINARY),)
 		-DWITH_SCALABILITY_METRICS=ON \
 		-DDOWNLOAD_BOOST=1 \
 		-DWITH_BOOST=libboost \
-		-DWITH_EXTRA_CHARSETS=all $(TOKUDB_OPTS_DEBUG) ..
+		-DWITH_EXTRA_CHARSETS=all ..
 endif
 
 	( test -d $(builddir) || mkdir $(builddir) ) && cd $(builddir) && \
@@ -121,7 +121,7 @@ endif
 		-DDOWNLOAD_BOOST=1 \
 		-DWITH_SCALABILITY_METRICS=ON \
 		-DWITH_BOOST=libboost \
-		-DWITH_EXTRA_CHARSETS=all $(TOKUDB_OPTS_RELEASE) ..
+		-DWITH_EXTRA_CHARSETS=all ..
 
 	touch $@
 
