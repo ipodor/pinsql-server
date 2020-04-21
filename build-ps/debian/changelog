@@ -1,3 +1,9 @@
+percona-server-5.6 (5.6.47-87.4) unstable; urgency=low
+
+  * Use a more efficient conditional in --csv-style
+
+ -- Ernie Souhrada <esouhrada@pinterest.com>  Tue, 21 Apr 2020 09:33:00 -0600
+
 percona-server-5.6 (5.6.47-87.3) unstable; urgency=low
 
   * My OCD doesn't like the extra space in the output of mysql --help

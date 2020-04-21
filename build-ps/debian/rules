@@ -4,7 +4,7 @@ export DH_VERBOSE=1
 export DEB_BUILD_HARDENING=1
 
 PACKAGE=percona-server-5.6
-PS_VERSION_EXTRA = '003'
+PS_VERSION_EXTRA = '004'
 REVISION = 'Electronic_Blackbird'
 COMPILATION_COMMENT_RELEASE = "PerconaPin Server (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
 COMPILATION_COMMENT_DEBUG = "PerconaPin Server - Debug (GPL), Release $(PS_VERSION_EXTRA), Revision $(REVISION)"
