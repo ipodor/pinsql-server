@@ -164,7 +164,7 @@ static my_bool ignore_errors=0,wait_flag=0,quick=0,
 	       tty_password= 0, opt_nobeep=0, opt_reconnect=1,
 	       opt_secure_auth= TRUE,
                default_pager_set= 0, opt_sigint_ignore= 0,
-               auto_vertical_output= 0,
+               auto_vertical_output= 0, opt_csvstyle= 0,
                show_warnings= 0, executing_query= 0, interrupted_query= 0,
                ignore_spaces= 0, opt_binhex= 0, opt_syslog= 0;
 static my_bool debug_info_flag, debug_check_flag;
@@ -261,7 +261,13 @@ my_win_is_console_cached(FILE *file)
 #define MY_PRINT_SPS_0 2  /* Replace 0x00 bytes to space             */
 #define MY_PRINT_XML   4  /* Encode XML entities                     */
 #define MY_PRINT_MB    8  /* Recognize multi-byte characters         */
-#define MY_PRINT_CTRL 16  /* Replace TAB, NL, CR to "\t", "\n", "\r" */
+#define MY_PRINT_CTRL 16  /* Replace TAB, NL to "\t", "\n"       */
+#define MY_PRINT_CSV  32  /* Print CSV-backup-friendly output:
+                             don't escape 0x00
+                             TAB => '\\' + '\t'
+                             NL => '\\' + '\n'
+                             "NULL" => "\\N"
+                           */
 
 void tee_write(FILE *file, const char *s, size_t slen, int flags);
 void tee_fprintf(FILE *file, const char *fmt, ...);
@@ -1589,6 +1595,12 @@ static struct my_option my_long_options[] =
   {"compress", 'C', "Use compression in server/client protocol.",
    &opt_compress, &opt_compress, 0, GET_BOOL, NO_ARG, 0, 0, 0,
    0, 0, 0},
+  {"csv-style", 'Y',
+   "Print Pinterest CSV-backup style output. "
+   "(Enables --silent, --unbuffered, --quick, --skip-column_names, and "
+   "--no-auto-rehash)",
+   &opt_csvstyle,
+   &opt_csvstyle, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
 #ifdef DBUG_OFF
   {"debug", '#', "This is a non-debug version. Catch this and exit.",
    0,0, 0, GET_DISABLED, OPT_ARG, 0, 0, 0, 0, 0, 0},
@@ -1812,11 +1824,11 @@ static void usage(int version)
 #endif
 
 #ifdef HAVE_READLINE
-  printf("%s  Ver %s Distrib %s, for %s (%s) using %s %s\n",
+  printf("PinSQL %s  Ver %s Distrib %s, for %s (%s) using %s %s\n",
 	 my_progname, VER, MYSQL_SERVER_VERSION, SYSTEM_TYPE, MACHINE_TYPE,
          readline, rl_library_version);
 #else
-  printf("%s  Ver %s Distrib %s, for %s (%s)\n", my_progname, VER,
+  printf("PinSQL %s  Ver %s Distrib %s, for %s (%s)\n", my_progname, VER,
 	MYSQL_SERVER_VERSION, SYSTEM_TYPE, MACHINE_TYPE);
 #endif
 
@@ -1972,6 +1984,18 @@ get_one_option(int optid, const struct my_option *opt MY_ATTRIBUTE((unused)),
       opt_silent= 0;
     else
       opt_silent++;
+    break;
+  case 'Y':
+    if (argument == disabled_my_option)
+      opt_csvstyle = 0;
+    else {
+      opt_csvstyle++;
+      set_if_bigger(opt_silent, 1);
+      set_if_bigger(unbuffered, 1);
+      set_if_bigger(quick, 1);
+      column_names = 0;
+      opt_rehash = 0;
+    }
     break;
   case 'v':
     if (argument == disabled_my_option)
@@ -4180,10 +4204,10 @@ static void
 safe_put_field(const char *pos,ulong length)
 {
   if (!pos)
-    tee_fputs("NULL", PAGER);
+    tee_fputs(opt_csvstyle ? "\\N" : "NULL", PAGER);
   else
   {
-    int flags= MY_PRINT_MB | (opt_raw_data ? 0 : (MY_PRINT_ESC_0 | MY_PRINT_CTRL));
+    int flags= MY_PRINT_MB | (opt_csvstyle ? MY_PRINT_CSV : (opt_raw_data ? 0 : (MY_PRINT_ESC_0 | MY_PRINT_CTRL)));
     /* Can't use tee_fputs(), it stops with NUL characters. */
     tee_write(PAGER, pos, length, flags);
   }
@@ -5320,7 +5344,15 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
       }
     }
 
-    if ((flags & MY_PRINT_XML) && (t= array_value(xmlmeta, *s)))
+    if ((flags & MY_PRINT_CSV) && *s == '\t') {
+      tee_putc('\\', file);
+      tee_putc('\t', file);
+    } else if ((flags & MY_PRINT_CSV) && *s == '\0') {
+      tee_putc(0, file);
+    } else if ((flags & MY_PRINT_CSV) && *s == '\n') {
+      tee_putc('\\', file);
+      tee_putc('\n', file);
+    } else if ((flags & MY_PRINT_XML) && (t= array_value(xmlmeta, *s)))
       tee_fputs(t, file);
     else if ((flags & MY_PRINT_SPS_0) && *s == '\0')
       tee_putc((int) ' ', file);   // This makes everything hard
@@ -5330,7 +5362,7 @@ void tee_write(FILE *file, const char *s, size_t slen, int flags)
       tee_fputs("\\t", file);      // This would destroy tab format
     else if ((flags & MY_PRINT_CTRL) && *s == '\n')
       tee_fputs("\\n", file);      // This too
-    else if ((flags & MY_PRINT_CTRL) && *s == '\\')
+    else if ((flags & (MY_PRINT_CTRL | MY_PRINT_CSV)) && *s == '\\')
       tee_fputs("\\\\", file);
     else
     {

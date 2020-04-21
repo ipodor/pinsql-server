@@ -1,3 +1,34 @@
+percona-server-5.6 (5.6.47-87.3) unstable; urgency=low
+
+  * My OCD doesn't like the extra space in the output of mysql --help
+
+ -- Ernie Souhrada <esouhrada@pinterest.com>  Fri, 06 Mar 2020 06:33:00 -0700
+
+percona-server-5.6 (5.6.47-87.2) unstable; urgency=medium
+
+  * Fix missing replacement of version strings.
+
+ -- Ernie Souhrada <esouhrada@pinterest.com>  Fri, 06 Mar 2020 05:33:00 -0700
+
+percona-server-5.6 (5.6.47-87.1) unstable; urgency=medium
+
+  * Update to PS 5.6.47
+  * Patch mysql client to support --csv-style modifier
+
+ -- Ernie Souhrada <esouhrada@pinterest.com>  Fri, 14 Feb 2020 04:33:00 -0700
+
+percona-server-5.6 (5.6.43-84.3-31337) unstable; urgency=medium
+
+  * Patch in fixes to userstats and binary log events
+
+ -- Ernie Souhrada <esouhrada@pinterest.com>  Fri, 12 Apr 2019 14:09:00 -0700
+
+percona-server-5.6 (5.6.43-84.3-1) unstable; urgency=medium
+
+  * Update to new upstream release Percona Server 5.6.43-84.3-2
+
+ -- Ubuntu <ubuntu@ip-10-177-2-168.us-east-2.compute.internal>  Thu, 24 Jan 2019 11:24:54 +0000
+
 percona-server-5.6 (5.6.29-rel76.3) unstable; urgency=low
 
   * Fix for description of the client package in debian (#1201074)
