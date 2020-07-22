@@ -56,44 +56,8 @@ fi
 
 case "$1" in
 	configure)
-
-	if [ -z "$2" ];
-	then
-
-		set -e
-
-
-		if [ ! "$(ls -A ${MYSQLDATA})" ] && [ -d ${MYSQLFILES} ];
-		then
-			db_get percona-server-server-5.7/root-pass && PASSWD=${RET}
-			if [ ! -z "${PASSWD}" ];
-			then
-				SQL=/var/lib/mysql-files/SQL
-				touch ${SQL}
-				chmod 600 ${SQL}
-				chown mysql:mysql ${SQL}
-
-				db_set percona-server-server-5.7/root-pass ""
-				db_set percona-server-server-5.7/re-root-pass ""
-				cat << EOF > ${SQL}
-USE mysql;
-UPDATE user SET authentication_string=PASSWORD('${PASSWD}') WHERE user='root';
-EOF
-				PASSWD=""
-				su - mysql -s /bin/bash -c "/usr/sbin/mysqld --initialize-insecure=on --init-file=${SQL} 2>&1 > /dev/null"
-				rm -f ${SQL}
-			else
-				su - mysql -s /bin/bash -c "/usr/sbin/mysqld --initialize-insecure=on 2>&1 > /dev/null"
-				su - mysql -s /bin/bash -c "/usr/sbin/mysqld --log_error_verbosity=2 2>&1 > /dev/null &"
-				while [ ! -e $(my_print_defaults mysqld | grep pid-file | cut -d= -f2) ]; do sleep 1; done
-				mysql -e "INSTALL PLUGIN auth_socket SONAME 'auth_socket.so'"
-				mysql -e "USE mysql; UPDATE user SET plugin='auth_socket' WHERE user='root'"
-				mysqladmin shutdown
-			fi
-		fi
-
-		set +e
-
+    echo -e "Percona-Server-server-5.7 configuration disabled.\n"
+    echo -e "Please make sure you manually initiate the server data directory!\n"
 	fi
 
 	;;

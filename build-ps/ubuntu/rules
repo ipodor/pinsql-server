@@ -112,10 +112,3 @@ override_dh_auto_install:
 
 	# install source tarball for source package
 	install -D -m 0644 $(EXPORTED_SOURCE_TARBALL) $(TMP)/usr/src/percona-server/`basename $(EXPORTED_SOURCE_TARBALL)`
-
-override_dh_installinit:
-	@echo "RULES.$@"
-	dh_systemd_enable --name=mysql
-	dh_installinit --name=mysql -- defaults 19 21
-	dh_systemd_start --restart-after-upgrade
-	touch $@
